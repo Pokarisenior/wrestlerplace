@@ -1,0 +1,24 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+}
+
+#map-container {
+    margin: 20px auto;
+    width: 100%;
+    max-width: 800px;
+    height: 500px; /* 必要に応じて高さを指定 */
+    position: relative;
+}
+
+#question {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+#result {
+    font-size: 20px;
+    margin-top: 20px;
+}

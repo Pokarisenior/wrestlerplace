@@ -12,12 +12,6 @@ const trivia = {
 
 let selectedPrefecture = "";
 let currentWrestler = {};
-let scale = 1;
-let startX = 0;
-let startY = 0;
-let offsetX = 0;
-let offsetY = 0;
-let isDragging = false;
 
 // ランダムなプロレスラーを表示する関数
 function displayRandomWrestler() {
@@ -27,19 +21,11 @@ function displayRandomWrestler() {
 }
 
 // 地図をクリックしたときの処理
-function handleMapClick(data) {
-    if (!isDragging) {
-        const mapContainer = document.getElementById('map-container');
-        const rect = mapContainer.getBoundingClientRect();
-        const x = (data.pageX - rect.left - offsetX) / scale;
-        const y = (data.pageY - rect.top - offsetY) / scale;
-
-        // クリック位置に基づいて都道府県を特定する
-        const clickedPrefecture = jpmap.getPrefectureByPoint(x, y);
-        if (clickedPrefecture) {
-            selectedPrefecture = clickedPrefecture.name;
-            document.getElementById('result').innerText = `選択したのは ${selectedPrefecture}`;
-        }
+function handleMapClick(event) {
+    const clickedElement = event.target;
+    if (clickedElement.classList.contains('prefecture')) {
+        selectedPrefecture = clickedElement.querySelector('title').textContent.split(' / ')[0];
+        document.getElementById('result').innerText = `選択したのは ${selectedPrefecture}`;
     }
 }
 
@@ -55,64 +41,23 @@ function judge() {
     triviaElement.innerText = trivia[selectedPrefecture] || "豆知識がありません。";
 }
 
-// 地図を生成する関数
-function generateMap() {
-    new jpmap.japanMap(document.getElementById('map'), {
-        showsPrefectureName: false,
-        width: 800,
-        height:800,
-        movesIslands: true,
-        lang: 'ja',
-        onSelect: handleMapClick
-    });
-}
+// SVG地図を読み込む関数
+async function loadSVGMap() {
+    const response = await fetch('https://raw.githubusercontent.com/geolonia/japanese-prefectures/master/map-mobile.svg');
+    const svgText = await response.text();
+    document.getElementById('map-container').innerHTML = svgText;
 
-// ピンチイン・アウトとスワイプを有効にする関数
-function enablePinchZoomAndSwipe() {
-    const mapContainer = document.getElementById('map-container');
-    const map = document.getElementById('map');
-
-    mapContainer.addEventListener('touchstart', (event) => {
-        if (event.touches.length === 2) {
-            startX = (event.touches[0].pageX + event.touches[1].pageX) / 2;
-            startY = (event.touches[0].pageY + event.touches[1].pageY) / 2;
-            startDistance = Math.hypot(
-                event.touches[0].pageX - event.touches[1].pageX,
-                event.touches[0].pageY - event.touches[1].pageY
-            );
-        } else if (event.touches.length === 1) {
-            startX = event.touches[0].pageX - offsetX;
-            startY = event.touches[0].pageY - offsetY;
-            isDragging = true;
-        }
-    });
-
-    mapContainer.addEventListener('touchmove', (event) => {
-        if (event.touches.length === 2) {
-            const currentDistance = Math.hypot(
-                event.touches[0].pageX - event.touches[1].pageX,
-                event.touches[0].pageY - event.touches[1].pageY
-            );
-            const zoomFactor = currentDistance / startDistance;
-            scale *= zoomFactor;
-            map.style.transform = `scale(${scale}) translate(${offsetX}px, ${offsetY}px)`;
-            startDistance = currentDistance;
-        } else if (event.touches.length === 1) {
-            offsetX = event.touches[0].pageX - startX;
-            offsetY = event.touches[0].pageY - startY;
-            map.style.transform = `scale(${scale}) translate(${offsetX}px, ${offsetY}px)`;
-        }
-    });
-
-    mapContainer.addEventListener('touchend', () => {
-        isDragging = false;
+    // 都道府県のクリックイベントを設定
+    const svgElement = document.querySelector('#map-container svg');
+    const prefectures = svgElement.querySelectorAll('g.prefecture');
+    prefectures.forEach(prefecture => {
+        prefecture.addEventListener('click', handleMapClick);
     });
 }
 
 // ページが読み込まれたときに実行する処理
 window.onload = function() {
-    generateMap();
+    loadSVGMap();
     displayRandomWrestler();
     document.getElementById('judge-button').addEventListener('click', judge);
-    enablePinchZoomAndSwipe();
 };

@@ -19,6 +19,7 @@ body {
     top:10px;
  }
 
+
 #map-container {
     width: 350px;
     height: 350px;
@@ -27,13 +28,11 @@ body {
     background-color: #fff;
     overflow: hidden; /* 地図のコンテナがはみ出さないようにする */
     position: relative;
-    touch-action: none; /* ピンチイン・アウトとスワイプを有効にする */
 }
 
-#map {
+#map-container svg {
     width: 100%;
     height: 100%;
-    transform-origin: center center;
 }
 
 #wrestler-name, #result, #trivia {

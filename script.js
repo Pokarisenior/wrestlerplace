@@ -1,27 +1,118 @@
-window.onload = function() {
-    // 地図を表示する関数を定義
-    function drawMap() {
-        japanMap.draw('#map-container', {
-            onSelect: function(data) {
-                const selectedPrefecture = data.name;
-                if (selectedPrefecture === currentPrefecture) {
-                    document.getElementById('result').textContent = "正解！";
-                } else {
-                    document.getElementById('result').textContent = "不正解。もう一度トライしてください。";
-                }
-            }
-        });
+// プロレスラーのリスト
+const wrestlers = [
+    { name: "鷹木慎吾", prefecture: "山梨県" },
+    { name: "田口隆祐", prefecture: "宮城県" }
+];
+
+// 都道府県の豆知識
+const trivia = {
+    "山梨県": "武田信玄で有名",
+    "宮城県": "会場夢メッセMIYAGI キャパ：5人"
+};
+
+let selectedPrefecture = "";
+let currentWrestler = {};
+let scale = 1;
+let startX = 0;
+let startY = 0;
+let offsetX = 0;
+let offsetY = 0;
+let isDragging = false;
+
+// ランダムなプロレスラーを表示する関数
+function displayRandomWrestler() {
+    const randomIndex = Math.floor(Math.random() * wrestlers.length);
+    currentWrestler = wrestlers[randomIndex];
+    document.getElementById('wrestler-name').innerText = currentWrestler.name;
+}
+
+// 地図をクリックしたときの処理
+function handleMapClick(data) {
+    if (!isDragging) {
+        const mapContainer = document.getElementById('map-container');
+        const rect = mapContainer.getBoundingClientRect();
+        const x = (data.pageX - rect.left - offsetX) / scale;
+        const y = (data.pageY - rect.top - offsetY) / scale;
+
+        // クリック位置に基づいて都道府県を特定する
+        const clickedPrefecture = jpmap.getPrefectureByPoint(x, y);
+        if (clickedPrefecture) {
+            selectedPrefecture = clickedPrefecture.name;
+            document.getElementById('result').innerText = `選択したのは ${selectedPrefecture}`;
+        }
     }
+}
 
-    // 都道府県名のリストを定義
-    const prefectures = ["北海道", "青森県", "岩手県", "宮城県", "秋田県", "山形県", "福島県", "茨城県", "栃木県", "群馬県", "埼玉県", "千葉県", "東京都", "神奈川県", "新潟県", "富山県", "石川県", "福井県", "山梨県", "長野県", "岐阜県", "静岡県", "愛知県", "三重県", "滋賀県", "京都府", "大阪府", "兵庫県", "奈良県", "和歌山県", "鳥取県", "島根県", "岡山県", "広島県", "山口県", "徳島県", "香川県", "愛媛県", "高知県", "福岡県", "佐賀県", "長崎県", "熊本県", "大分県", "宮崎県", "鹿児島県", "沖縄県"];
+// 判定ボタンをクリックしたときの処理
+function judge() {
+    const resultElement = document.getElementById('result');
+    const triviaElement = document.getElementById('trivia');
+    if (selectedPrefecture === currentWrestler.prefecture) {
+        resultElement.innerText = '正解です！';
+    } else {
+        resultElement.innerText = '不正解です。';
+    }
+    triviaElement.innerText = trivia[selectedPrefecture] || "豆知識がありません。";
+}
 
-    // ランダムに都道府県名を選択
-    let currentPrefecture = prefectures[Math.floor(Math.random() * prefectures.length)];
+// 地図を生成する関数
+function generateMap() {
+    new jpmap.japanMap(document.getElementById('map'), {
+        showsPrefectureName: false,
+        width: 800,
+        height:800,
+        movesIslands: true,
+        lang: 'ja',
+        onSelect: handleMapClick
+    });
+}
 
-    // 選ばれた都道府県名を表示
-    document.getElementById('question').textContent = `次はどこ？: ${currentPrefecture}`;
+// ピンチイン・アウトとスワイプを有効にする関数
+function enablePinchZoomAndSwipe() {
+    const mapContainer = document.getElementById('map-container');
+    const map = document.getElementById('map');
 
-    // 地図を描画
-    drawMap();
+    mapContainer.addEventListener('touchstart', (event) => {
+        if (event.touches.length === 2) {
+            startX = (event.touches[0].pageX + event.touches[1].pageX) / 2;
+            startY = (event.touches[0].pageY + event.touches[1].pageY) / 2;
+            startDistance = Math.hypot(
+                event.touches[0].pageX - event.touches[1].pageX,
+                event.touches[0].pageY - event.touches[1].pageY
+            );
+        } else if (event.touches.length === 1) {
+            startX = event.touches[0].pageX - offsetX;
+            startY = event.touches[0].pageY - offsetY;
+            isDragging = true;
+        }
+    });
+
+    mapContainer.addEventListener('touchmove', (event) => {
+        if (event.touches.length === 2) {
+            const currentDistance = Math.hypot(
+                event.touches[0].pageX - event.touches[1].pageX,
+                event.touches[0].pageY - event.touches[1].pageY
+            );
+            const zoomFactor = currentDistance / startDistance;
+            scale *= zoomFactor;
+            map.style.transform = `scale(${scale}) translate(${offsetX}px, ${offsetY}px)`;
+            startDistance = currentDistance;
+        } else if (event.touches.length === 1) {
+            offsetX = event.touches[0].pageX - startX;
+            offsetY = event.touches[0].pageY - startY;
+            map.style.transform = `scale(${scale}) translate(${offsetX}px, ${offsetY}px)`;
+        }
+    });
+
+    mapContainer.addEventListener('touchend', () => {
+        isDragging = false;
+    });
+}
+
+// ページが読み込まれたときに実行する処理
+window.onload = function() {
+    generateMap();
+    displayRandomWrestler();
+    document.getElementById('judge-button').addEventListener('click', judge);
+    enablePinchZoomAndSwipe();
 };

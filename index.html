@@ -3,16 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>都道府県タップゲーム</title>
+    <title>プロレスラー出身地当てゲーム</title>
     <link rel="stylesheet" href="style.css">
-    <!-- japan-map-jsの読み込み -->
-    <script src="https://cdn.jsdelivr.net/npm/japan-map-js/dist/japan-map.min.js"></script>
+    <script src="https://unpkg.com/japan-map-js@1.0.1/dist/jpmap.min.js"></script>
 </head>
 <body>
-    <h1>都道府県を当てるゲーム</h1>
-    <p id="question">...</p>
-    <div id="map-container"></div>
-    <p id="result"></p>
+    <div id="frame-container">
+    <h1>プロレスラー出身地当てゲーム</h1>
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+    <div id="wrestler-name"></div>
+    <button id="judge-button">判定</button>
+    <div id="result"></div>
+    <div id="trivia"></div>
     <script src="script.js"></script>
 </body>
 </html>

@@ -1,24 +1,49 @@
 body {
     font-family: Arial, sans-serif;
     text-align: center;
-    margin: 0;
-    padding: 20px;
+    background-color: #f0f0f0;
 }
+
+#frame-container {
+    width: 375px; /* 幅を375pxに設定 */
+    height: 620px; /* 高さを620pxに設定 */
+    border: 2px solid black; /* 黒の2pxの境界線を設定 */
+    display: flex; /* Flexboxレイアウトを使用 */
+    flex-direction: column; /* 子要素を縦方向に配置 */
+    align-items: center; /* 子要素を中央寄せ */
+    justify-content: flex-start; /* 子要素を上寄せ */
+    box-sizing: border-box; /* 境界線とパディングを含めたボックスサイズを設定 */
+    padding: 10px; /* 内側の余白を10pxに設定 */
+    position: absolute;
+    left:10px;
+    top:10px;
+ }
 
 #map-container {
-    margin: 20px auto;
-    width: 100%;
-    max-width: 800px;
-    height: 500px; /* 必要に応じて高さを指定 */
+    width: 350px;
+    height: 350px;
+    margin: 0 auto;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    overflow: hidden; /* 地図のコンテナがはみ出さないようにする */
     position: relative;
+    touch-action: none; /* ピンチイン・アウトとスワイプを有効にする */
 }
 
-#question {
+#map {
+    width: 100%;
+    height: 100%;
+    transform-origin: center center;
+}
+
+#wrestler-name, #result, #trivia {
+    margin-top: 20px;
     font-size: 24px;
     font-weight: bold;
 }
 
-#result {
-    font-size: 20px;
+#judge-button {
     margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 18px;
 }
